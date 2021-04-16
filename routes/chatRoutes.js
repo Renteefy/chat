@@ -8,7 +8,7 @@ function genChatID() {
   return nanoid.nanoid();
 }
 
-router.get("/test", (req, res) => res.send("cum on bbg"));
+router.get("/test", (req, res) => res.send("cum on bbg 💦"));
 
 router.post("/chatRoom", (req, res) => {
   const user1 = req.body.user1;
