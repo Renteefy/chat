@@ -7,7 +7,7 @@ let i = 0;
 let lookup = {};
 
 function makeServer(server) {
-  const wss = new WebSocket.Server({ server });
+  const wss = new WebSocket.Server({ server: server, path: "/ws" });
   wss.on("connection", function connection(ws, req) {
     console.log("A connection has arrived. ");
     ws.id = i++;
