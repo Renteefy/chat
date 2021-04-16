@@ -1,0 +1,21 @@
+name: Deploy Backend to Droplet hehe
+on: 
+  push:
+    branches: [0.0]
+jobs:
+  jobOne:
+    name: Deploying new push update to testing server
+    runs-on: ubuntu-latest
+    steps:
+    - name: checking ssh connection
+      uses: appleboy/ssh-action@master
+      with:
+        host: chat.renteefy.ga
+        username: root
+        password: ${{ secrets.SERVER_SECRET }}
+        port: 22
+        script: |
+          cd chat
+          git checkout 0.0
+          git pull
+          pm2 restart chatServer
