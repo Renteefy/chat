@@ -50,7 +50,7 @@ function makeServer(server) {
         }
       });
     } catch (err) {
-      console.log(err);
+      console.log({ err, error: "cant find username in the url" });
     }
   });
 }

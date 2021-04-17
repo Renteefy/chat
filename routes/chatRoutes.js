@@ -48,6 +48,7 @@ router.post("/chatRoom", (req, res) => {
     }
   );
 });
+
 router.get("/userchatRoom/:username", (req, res) => {
   const username = req.params.username;
   chatRoom.find(
@@ -61,6 +62,13 @@ router.get("/userchatRoom/:username", (req, res) => {
       }
     }
   );
+});
+
+router.post("/chats", (req, res) => {
+  const chatID = req.body.chatID;
+  chat.findOne({ chatID }, (err, doc) => {
+    res.send(doc);
+  });
 });
 
 module.exports = router;
