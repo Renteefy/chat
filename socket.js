@@ -5,7 +5,7 @@ const WebSocket = require("ws");
 const nanoid = require("nanoid");
 
 const admin = require("firebase-admin");
-const serviceAccount = require("./../renteefy-notification-system-firebase-adminsdk-z3xwc-6e9407d43a.json");
+const serviceAccount = require("./renteefy-notification-system-firebase-adminsdk-z3xwc-6e9407d43a.json");
 const Users = require("./models/users");
 
 admin.initializeApp({
