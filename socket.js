@@ -1,26 +1,60 @@
 const Chats = require("./models/chats");
 const Redis = require("ioredis");
-const redis = new Redis();
+const redis = new Redis({ port: 6379 });
 const WebSocket = require("ws");
 const nanoid = require("nanoid");
 
-let lookup = {};
+const admin = require("firebase-admin");
+const serviceAccount = require("./../renteefy-notification-system-firebase-adminsdk-z3xwc-6e9407d43a.json");
+const Users = require("./models/users");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+const firestore = admin.firestore();
+
+// dont copy paste this method. Mongoose model is not defined for this model
+// thus it returns the user obj but does not let us use its properties
+// thats why the parsing stringify
+const getEmailfromUsername = async (username) => {
+  let user = await Users.findOne({ username });
+  return JSON.parse(JSON.stringify(user)).email;
+};
 
 function makeServer(server) {
   const wss = new WebSocket.Server({ server: server, path: "/ws" });
-  wss.on("connection", function connection(ws, req) {
-    console.log("A connection has arrived. ");
+  wss.on("connection", async function connection(ws, req) {
+    //console.log("A connection has arrived. ");
     ws.id = nanoid.nanoid();
     try {
       const username = req.url.split("?")[1].split("=")[1];
-      console.log(username);
-      //lookup[ws.id] = ws;
-      redis.set(username, ws.id);
-      ws.on("message", function incoming(message) {
-        console.log("received: %s", message);
+      //console.log(username);
+      //console.log(await getUserObjfromUsername(username));
+      //const notifiuser = await getUserObjfromUsername(username);
+      //const token = await firestore.collection("users").doc(user.email).get();
 
+      redis.set(username, ws.id);
+      ws.on("message", async function incoming(message) {
+        //console.log("received: %s", message);
         try {
-          var json = JSON.parse(message);
+          let json = JSON.parse(message);
+
+          // notification setup
+          let email = await getEmailfromUsername(json.receiver);
+          const token = await firestore.collection("users").doc(email).get();
+          //console.log(token.data().token);
+          const notification_options = {
+            priority: "high",
+            timeToLive: 60 * 60 * 24,
+          };
+          const notifimessage = {
+            notification: {
+              title: "New Message 📪",
+              body: json.sender + " has sent you a message",
+            },
+          };
+          // end of notification setup
+
           switch (json.action) {
             case "privateMessage":
               storeMessage(json);
@@ -29,6 +63,23 @@ function makeServer(server) {
                 if (err) {
                   console.error(err);
                 } else {
+                  // notify the receiver (firebase)
+                  admin
+                    .messaging()
+                    .sendToDevice(
+                      token.data().token,
+                      notifimessage,
+                      notification_options
+                    )
+                    .then((response) => {
+                      console.log("notification sent");
+                    })
+                    .catch((error) => {
+                      console.log(
+                        "couldnt send notification : error : " + error
+                      );
+                    });
+                  //send message to receiver (custom server)
                   wss.clients.forEach(function each(client) {
                     if (
                       client.readyState === WebSocket.OPEN &&

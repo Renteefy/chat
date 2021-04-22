@@ -66,6 +66,7 @@ router.get("/userchatRoom/:username", (req, res) => {
 
 router.post("/chats", (req, res) => {
   const chatID = req.body.chatID;
+  console.log(chatID);
   chat.findOne({ chatID }, (err, doc) => {
     res.send(doc);
   });
