@@ -18,6 +18,7 @@ const firestore = admin.firestore();
 // thats why the parsing stringify
 const getEmailfromUsername = async (username) => {
   let user = await Users.findOne({ username });
+  console.log(user);
   return JSON.parse(JSON.stringify(user)).email;
 };
 

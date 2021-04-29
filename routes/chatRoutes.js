@@ -14,7 +14,7 @@ router.post("/chatRoom", (req, res) => {
   const user1 = req.body.user1;
   const user2 = req.body.user2;
   const chatID = genChatID();
-  console.log(user1);
+  //console.log(user1);
   chatRoom.findOne(
     {
       $or: [
